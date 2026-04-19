@@ -1,0 +1,60 @@
+{% extends 'store/base.html' %}
+
+{% block title %}{{ product.name }} — ShopEasy{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Products</a>
+
+<div class="detail-grid card">
+    <div class="detail-img">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+    </div>
+    <div class="detail-info">
+        <h1 class="detail-name">{{ product.name }}</h1>
+        <div class="detail-price">₹{{ product.price }}</div>
+
+        <div class="detail-meta">
+            <span class="meta-item {% if product.stock == 0 %}out{% endif %}">
+                {% if product.stock > 0 %}✅ In Stock ({{ product.stock }} available){% else %}❌ Out of Stock{% endif %}
+            </span>
+        </div>
+
+        <div class="detail-desc">
+            <h3>Description</h3>
+            <p>{{ product.description }}</p>
+        </div>
+
+        <div class="detail-actions">
+            {% if product.stock > 0 %}
+                <a href="{% url 'add_to_cart' product.pk %}" class="btn btn-primary">
+                    🛒 Add to Cart
+                </a>
+            {% else %}
+                <button class="btn btn-outline" disabled>Out of Stock</button>
+            {% endif %}
+            <a href="{% url 'cart' %}" class="btn btn-outline">View Cart</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+.back-link:hover { color: var(--primary); text-decoration: none; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.detail-img img { width: 100%; height: 100%; object-fit: cover; min-height: 360px; }
+.detail-info { padding: 36px; display: flex; flex-direction: column; gap: 18px; }
+.detail-name { font-size: 1.9rem; font-weight: 700; line-height: 1.2; }
+.detail-price { font-size: 2rem; font-weight: 800; color: var(--primary); }
+.detail-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+.meta-item { font-size: 0.88rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #ecfdf5; color: #065f46; }
+.meta-item.out { background: #fef2f2; color: #991b1b; }
+.detail-desc h3 { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+.detail-desc p { color: var(--text); line-height: 1.7; }
+.detail-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+@media (max-width: 700px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .detail-img img { min-height: 240px; }
+    .detail-info { padding: 20px; }
+}
+</style>
+{% endblock %}

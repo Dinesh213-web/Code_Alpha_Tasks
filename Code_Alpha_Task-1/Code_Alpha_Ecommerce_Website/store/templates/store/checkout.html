@@ -1,0 +1,75 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Checkout — ShopEasy{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>✅ Checkout</h1>
+    <p>Review your order before placing it</p>
+</div>
+
+<div class="checkout-layout">
+    <div class="order-review card">
+        <h2>Order Review</h2>
+        <table class="order-table">
+            <thead>
+                <tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.product.price }}</td>
+                    <td><strong>₹{{ item.item_total }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align:right;font-weight:700;padding-top:12px;">Total:</td>
+                    <td style="font-weight:800;font-size:1.15rem;color:var(--primary);padding-top:12px;">₹{{ total }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="checkout-panel card">
+        <h2>Order Details</h2>
+        <div class="checkout-info">
+            <div class="info-row"><span>👤 Customer</span><strong>{{ user.get_full_name|default:user.username }}</strong></div>
+            <div class="info-row"><span>📧 Email</span><strong>{{ user.email|default:"—" }}</strong></div>
+            <div class="info-row"><span>💳 Payment</span><strong>Cash on Delivery</strong></div>
+            <div class="info-row"><span>🚚 Shipping</span><strong>Free</strong></div>
+        </div>
+        <div class="total-box">
+            <span>Order Total</span>
+            <span class="big-total">₹{{ total }}</span>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="width:100%;justify-content:center;font-size:1rem;padding:14px;">
+                🎉 Place Order
+            </button>
+        </form>
+        <a href="{% url 'cart' %}" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:10px;">← Back to Cart</a>
+    </div>
+</div>
+
+<style>
+.checkout-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+.order-review { padding: 28px; }
+.order-review h2, .checkout-panel h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+.order-table { width: 100%; border-collapse: collapse; }
+.order-table th { text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding-bottom: 10px; border-bottom: 1.5px solid var(--border); }
+.order-table td { padding: 12px 8px 12px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; vertical-align: middle; }
+.checkout-panel { padding: 28px; }
+.checkout-info { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.info-row { display: flex; justify-content: space-between; font-size: 0.9rem; }
+.info-row span { color: var(--text-muted); }
+.total-box { display: flex; justify-content: space-between; align-items: center; background: var(--bg); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+.total-box span:first-child { font-weight: 600; }
+.big-total { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+@media (max-width: 768px) { .checkout-layout { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

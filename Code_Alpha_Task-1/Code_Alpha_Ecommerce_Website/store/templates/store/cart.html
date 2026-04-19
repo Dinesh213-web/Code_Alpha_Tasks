@@ -1,0 +1,118 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Cart — ShopEasy{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🛒 Shopping Cart</h1>
+    {% if cart_items %}<p>{{ cart_items|length }} item(s) in your cart</p>{% endif %}
+</div>
+
+{% if cart_items %}
+<div class="cart-layout">
+    <div class="cart-items">
+        {% for item in cart_items %}
+        <div class="cart-row card">
+            <img class="cart-img" src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+            <div class="cart-info">
+                <a href="{% url 'product_detail' item.product.pk %}">
+                    <h3>{{ item.product.name }}</h3>
+                </a>
+                <p class="unit-price">${{ item.product.price }} each</p>
+            </div>
+            <div class="cart-qty">
+                <form method="post" action="{% url 'update_cart' item.product.pk %}" class="qty-form">
+                    {% csrf_token %}
+                    <button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}" class="qty-btn">−</button>
+                    <span class="qty-val">{{ item.quantity }}</span>
+                    <button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}" class="qty-btn">+</button>
+                </form>
+            </div>
+            <div class="cart-subtotal">
+                <span>₹{{ item.item_total }}</span>
+            </div>
+            <a href="{% url 'remove_from_cart' item.product.pk %}" class="remove-btn" title="Remove">✕</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cart-summary card">
+        <h2>Order Summary</h2>
+        <div class="summary-row"><span>Subtotal</span><span>₹{{ total }}</span></div>
+        <div class="summary-row"><span>Shipping</span><span class="free">FREE</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-row total-row"><span>Total</span><span>₹{{ total }}</span></div>
+        <div class="summary-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'checkout' %}" class="btn btn-success" style="width:100%;justify-content:center;">
+                    ✅ Proceed to Checkout
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'checkout' %}" class="btn btn-primary" style="width:100%;justify-content:center;">
+                    🔒 Login to Checkout
+                </a>
+            {% endif %}
+            <a href="{% url 'home' %}" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:10px;">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="empty-cart">
+    <div style="font-size:4rem;margin-bottom:16px;">🛒</div>
+    <h2>Your cart is empty</h2>
+    <p>Add some products to get started!</p>
+    <a href="{% url 'home' %}" class="btn btn-primary" style="margin-top:20px;">Browse Products</a>
+</div>
+{% endif %}
+
+<style>
+.cart-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+.cart-items { display: flex; flex-direction: column; gap: 12px; }
+.cart-row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto auto 32px;
+    gap: 16px;
+    align-items: center;
+    padding: 16px;
+}
+.cart-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+.cart-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+.cart-info h3 a { color: var(--text); }
+.cart-info h3 a:hover { color: var(--primary); text-decoration: none; }
+.unit-price { font-size: 0.85rem; color: var(--text-muted); }
+.qty-form { display: flex; align-items: center; gap: 8px; }
+.qty-btn {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+}
+.qty-btn:hover { background: var(--bg); border-color: var(--primary); color: var(--primary); }
+.qty-val { font-weight: 700; min-width: 24px; text-align: center; }
+.cart-subtotal { font-weight: 700; font-size: 1.05rem; color: var(--primary); min-width: 60px; text-align: right; }
+.remove-btn { color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 4px; border-radius: 4px; }
+.remove-btn:hover { color: var(--danger); background: #fef2f2; text-decoration: none; }
+
+.cart-summary { padding: 24px; }
+.cart-summary h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+.summary-row { display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 12px; }
+.free { color: var(--success); font-weight: 600; }
+.summary-divider { border-top: 1.5px solid var(--border); margin: 16px 0; }
+.total-row { font-size: 1.15rem; font-weight: 700; }
+.summary-actions { margin-top: 20px; }
+.empty-cart { text-align: center; padding: 80px 20px; }
+.empty-cart h2 { font-size: 1.5rem; color: var(--text-muted); margin-bottom: 8px; }
+@media (max-width: 768px) {
+    .cart-layout { grid-template-columns: 1fr; }
+    .cart-row { grid-template-columns: 60px 1fr; gap: 10px; }
+    .cart-qty, .cart-subtotal, .remove-btn { grid-column: 2; }
+}
+</style>
+{% endblock %}
