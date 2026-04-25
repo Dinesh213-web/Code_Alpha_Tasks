@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SocialApp{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a22;
+      --surface2: #22222e;
+      --border: #2e2e3e;
+      --accent: #7c6af7;
+      --accent-hover: #9580ff;
+      --text: #e8e8f0;
+      --text-muted: #888899;
+      --danger: #f04a68;
+      --success: #3ecf8e;
+      --radius: 12px;
+      --nav-h: 60px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h);
+      background: rgba(15,15,19,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+    }
+    .nav-brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-links a, .nav-links button {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color .2s, background .2s;
+    }
+    .nav-links a:hover, .nav-links button:hover { color: var(--text); background: var(--surface2); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-user { color: var(--text-muted); font-size: 0.8rem; }
+
+    /* ── LAYOUT ── */
+    .page-wrapper {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: calc(var(--nav-h) + 24px) 16px 48px;
+    }
+
+    /* ── MESSAGES ── */
+    .messages { margin-bottom: 16px; }
+    .msg {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      margin-bottom: 8px;
+    }
+    .msg.success { background: rgba(62,207,142,.12); border: 1px solid rgba(62,207,142,.3); color: var(--success); }
+    .msg.error   { background: rgba(240,74,104,.12);  border: 1px solid rgba(240,74,104,.3);  color: var(--danger); }
+    .msg.info    { background: rgba(124,106,247,.12); border: 1px solid rgba(124,106,247,.3); color: var(--accent); }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* ── FORMS ── */
+    input[type=text], input[type=email], input[type=password], textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color .2s;
+      resize: vertical;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .form-group { margin-bottom: 14px; }
+    .helptext { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .errorlist { list-style: none; color: var(--danger); font-size: 0.8rem; margin-top: 4px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger  { background: transparent; color: var(--danger); border: 1px solid transparent; font-size: 0.8rem; padding: 4px 10px; }
+    .btn-danger:hover { border-color: var(--danger); background: rgba(240,74,104,.1); }
+    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── POST ── */
+    .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #f06292);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem; color: #fff;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .avatar.lg { width: 56px; height: 56px; font-size: 1.2rem; }
+    .post-meta a { color: var(--text); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    .post-meta a:hover { color: var(--accent); }
+    .post-time { color: var(--text-muted); font-size: 0.75rem; }
+    .post-content { font-size: 0.95rem; line-height: 1.6; margin-bottom: 14px; }
+    .post-actions { display: flex; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+
+    /* ── LIKE BUTTON ── */
+    .like-btn {
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      color: var(--text-muted); font-size: 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      padding: 5px 10px; border-radius: 8px;
+      transition: all .2s;
+    }
+    .like-btn:hover { background: rgba(240,74,104,.1); color: var(--danger); }
+    .like-btn.liked { color: var(--danger); }
+    .like-btn .heart { font-size: 1rem; transition: transform .15s; }
+    .like-btn:active .heart { transform: scale(1.3); }
+
+    /* ── COMMENTS ── */
+    .comments-section { margin-top: 14px; }
+    .comment { display: flex; gap: 8px; margin-bottom: 10px; }
+    .comment-body { background: var(--surface2); border-radius: 8px; padding: 8px 12px; flex: 1; }
+    .comment-author { font-size: 0.8rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .comment-text  { font-size: 0.85rem; color: var(--text); margin-top: 2px; }
+    .comment-time  { font-size: 0.72rem; color: var(--text-muted); }
+    .comment-form  { display: flex; gap: 8px; margin-top: 12px; }
+    .comment-form input { flex: 1; }
+
+    /* ── MISC ── */
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .text-muted { color: var(--text-muted); font-size: 0.875rem; }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .toggle-comments-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 0.8rem;
+      font-family: 'DM Sans', sans-serif;
+      padding: 5px 10px; border-radius: 8px;
+      transition: all .2s;
+    }
+    .toggle-comments-btn:hover { background: var(--surface2); color: var(--text); }
+
+    /* ── FOLLOW BTN ── */
+    .follow-btn {
+      padding: 6px 18px; border-radius: 8px; border: 1px solid var(--accent);
+      background: transparent; color: var(--accent);
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+    }
+    .follow-btn:hover, .follow-btn.following {
+      background: var(--accent); color: #fff;
+    }
+    .follow-btn.following:hover {
+      background: transparent; color: var(--danger); border-color: var(--danger);
+    }
+
+    /* ── PROFILE STATS ── */
+    .profile-stats { display: flex; gap: 24px; margin-top: 12px; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 1.2rem; font-weight: 600; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+    /* ── USER ROW ── */
+    .user-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+    }
+    .user-row:last-child { border-bottom: none; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-name { font-weight: 600; text-decoration: none; color: var(--text); }
+    .user-name:hover { color: var(--accent); }
+    
+    input[type="file"] {
+      display: none;
+    }
+
+    .custom-file-upload {
+      display: inline-block;
+      padding: 9px 18px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .custom-file-upload:hover {
+      background: var(--accent-hover);
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<nav>
+  <a href="{% url 'feed' %}" class="nav-brand">✦ social</a>
+  <div class="nav-links">
+    <a href="{% url 'feed' %}" {% if request.resolver_match.url_name == 'feed' %}class="active"{% endif %}>Home</a>
+    <a href="{% url 'explore' %}" {% if request.resolver_match.url_name == 'explore' %}class="active"{% endif %}>Explore</a>
+    <a href="{% url 'profile' user.username %}" {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}>
+      {{ user.username }}
+    </a>
+    <form method="post" action="{% url 'logout' %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit">Logout</button>
+    </form>
+  </div>
+</nav>
+{% endif %}
+
+<div class="page-wrapper">
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <div class="msg {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<script>
+// ── CSRF helper ──────────────────────────────────────────────────────────────
+function getCookie(name) {
+  let v = null;
+  document.cookie.split(';').forEach(c => {
+    c = c.trim();
+    if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+  });
+  return v;
+}
+const CSRF = getCookie('csrftoken');
+
+// ── Like toggle ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.like-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const postId = btn.dataset.postId;
+    const res = await fetch(`/post/${postId}/like/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF }
+    });
+    const data = await res.json();
+    btn.querySelector('.like-count').textContent = data.count;
+    btn.classList.toggle('liked', data.liked);
+    btn.querySelector('.heart').textContent = data.liked ? '❤️' : '🤍';
+  });
+});
+
+// ── Follow toggle ─────────────────────────────────────────────────────────────
+// querySelectorAll handles EVERY follow button on the page (profile + explore).
+// Previously querySelector (singular) only wired up the very first button,
+// so all other buttons on the explore page did nothing.
+document.querySelectorAll('.follow-btn[data-username]').forEach(function(btn) {
+  btn.addEventListener('click', async function() {
+    const username = btn.dataset.username;
+
+    // Disable button while request is in flight so double-clicks can't fire
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/user/' + username + '/follow/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': CSRF,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (!res.ok) {
+        console.error('Follow request failed with status:', res.status);
+        btn.disabled = false;
+        return;
+      }
+
+      const data = await res.json();
+
+      // Update button appearance
+      btn.classList.toggle('following', data.following);
+      btn.textContent = data.following ? 'Following' : 'Follow';
+
+      // Update follower count on the profile page stat block
+      const profileCount = document.querySelector('.followers-count');
+      if (profileCount) {
+        profileCount.textContent = data.followers_count;
+      }
+
+      // Update the "X followers" text on the explore page for this specific row
+      const userRow = btn.closest('.user-row');
+      if (userRow) {
+        const infoLine = userRow.querySelector('.post-time');
+        if (infoLine) {
+          // Keep "N posts ·" prefix, replace the followers number
+          const postsText = infoLine.textContent.split('·')[0].trim();
+          infoLine.textContent = postsText + ' · ' + data.followers_count + ' followers';
+        }
+      }
+
+    } catch (err) {
+      console.error('Follow error:', err);
+    }
+
+    btn.disabled = false;
+  });
+});
+
+// ── Toggle comments ──────────────────────────────────────────────────────────
+document.querySelectorAll('.toggle-comments-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const postId = btn.dataset.postId;
+    const section = document.querySelector(`.comments-section[data-post-id="${postId}"]`);
+    const open = section.style.display !== 'block';
+    section.style.display = open ? 'block' : 'none';
+    const count = btn.querySelector('.comment-count').textContent;
+    btn.innerHTML = open
+      ? `💬 <span class="comment-count">${count}</span> comments ▲`
+      : `💬 <span class="comment-count">${count}</span> comments`;
+  });
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}Explore — Social{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Explore Users</h2>
+
+{% if users %}
+<div class="card">
+  {% for u in users %}
+  <div class="user-row">
+    <div class="user-info">
+      <a href="{% url 'profile' u.username %}" class="avatar">{{ u.username|first|upper }}</a>
+      <div>
+        <a href="{% url 'profile' u.username %}" class="user-name">{{ u.username }}</a>
+        <!--
+          post-time text is updated live by the follow JS in base.html
+          after a successful follow/unfollow toggle.
+        -->
+        <div class="post-time">{{ u.posts.count }} posts · {{ u.followers.count }} followers</div>
+      </div>
+    </div>
+    <!--
+      data-username is all the JS in base.html needs.
+      The onclick="toggleFollow(...)" that was here before caused a DOUBLE request
+      (onclick fired AND the base.html event listener fired), so both cancelled each other.
+      Removed onclick — base.html's querySelectorAll handles every button on the page.
+    -->
+    <button class="follow-btn {% if u.id in following_ids %}following{% endif %}"
+            data-username="{{ u.username }}">
+      {% if u.id in following_ids %}Following{% else %}Follow{% endif %}
+    </button>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="empty-icon">🔍</div>
+  <p style="font-weight:600;">No other users yet</p>
+  <p class="text-muted">Invite friends to join!</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{# No extra_js needed — the unified follow handler lives in base.html #}

@@ -1,0 +1,146 @@
+{% extends 'core/base.html' %}
+{% block title %}Home — Social{% endblock %}
+
+{% block content %}
+
+<!-- ── Create Post ─────────────────────────────────────────────────────────── -->
+<!--
+  IMPORTANT: enctype="multipart/form-data" is required for file uploads.
+  Without it, the browser won't send image/video data to Django.
+-->
+<div class="card" style="margin-bottom:24px;">
+  <p style="font-weight:600; margin-bottom:14px;">✍️ Create a Post</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ post_form.content }}
+      {% if post_form.content.errors %}
+        <ul class="errorlist">{% for e in post_form.content.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <!-- Media upload fields -->
+    <div class="form-group" style="flex:1; min-width:140px;">
+      <label class="custom-file-upload">
+        Image
+        {{ post_form.image }}
+      </label>
+    </div>
+
+    <div class="form-group" style="flex:1; min-width:140px;">
+      <label class="custom-file-upload">
+        Video
+        {{ post_form.video }}
+      </label>
+    </div>
+
+    {% if post_form.non_field_errors %}
+      <p style="color:var(--danger); font-size:0.82rem; margin-bottom:10px;">
+        {{ post_form.non_field_errors|join:", " }}
+      </p>
+    {% endif %}
+
+    <div style="display:flex; justify-content:flex-end;">
+      <button type="submit" class="btn btn-primary">Post</button>
+    </div>
+  </form>
+</div>
+
+<!-- ── Feed ───────────────────────────────────────────────────────────────── -->
+<h2 class="section-title">Your Feed</h2>
+
+{% if posts %}
+  {% for post in posts %}
+  <div class="card">
+
+    <!-- Post Header: avatar + username + timestamp + delete -->
+    <div class="post-header">
+      <a href="{% url 'profile' post.author.username %}" class="avatar">
+        {{ post.author.username|first|upper }}
+      </a>
+      <div class="post-meta">
+        <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
+        <div class="post-time">{{ post.created_at|timesince }} ago</div>
+      </div>
+      {% if post.author == user %}
+      <form method="post" action="{% url 'delete_post' post.id %}" style="margin-left:auto;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this post?')">✕ Delete</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Post Text -->
+    {% if post.content %}
+    <p class="post-content">{{ post.content }}</p>
+    {% endif %}
+
+    <!-- Post Image -->
+    {% if post.image %}
+    <div style="margin-bottom:14px;">
+      <img src="{{ post.image.url }}"
+           alt="Post image by {{ post.author.username }}"
+           style="width:100%; border-radius:8px; max-height:480px; object-fit:cover;">
+    </div>
+    {% endif %}
+
+    <!-- Post Video -->
+    {% if post.video %}
+    <div style="margin-bottom:14px;">
+      <video controls style="width:100%; border-radius:8px; max-height:420px; background:#000;">
+        <source src="{{ post.video.url }}">
+        Your browser does not support HTML5 video.
+      </video>
+    </div>
+    {% endif %}
+
+    <!-- Actions: Like + Comments toggle -->
+    <div class="post-actions">
+      <button class="like-btn {% if post.id in liked_post_ids %}liked{% endif %}"
+              data-post-id="{{ post.id }}">
+        <span class="heart">{% if post.id in liked_post_ids %}❤️{% else %}🤍{% endif %}</span>
+        <span class="like-count">{{ post.like_count }}</span> likes
+      </button>
+
+      <button class="toggle-comments-btn" data-post-id="{{ post.id }}">
+        💬 <span class="comment-count">{{ post.comment_count }}</span> comments
+      </button>
+    </div>
+
+    <!-- Comments Section (hidden by default, toggled by JS) -->
+    <div class="comments-section" data-post-id="{{ post.id }}" style="display:none; margin-top:12px;">
+      {% for comment in post.comments.all %}
+      <div class="comment">
+        <a href="{% url 'profile' comment.author.username %}" class="avatar" style="width:28px;height:28px;font-size:0.7rem;">
+          {{ comment.author.username|first|upper }}
+        </a>
+        <div class="comment-body">
+          <a href="{% url 'profile' comment.author.username %}" class="comment-author">{{ comment.author.username }}</a>
+          <p class="comment-text">{{ comment.content }}</p>
+          <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-muted" style="font-size:0.8rem; padding:8px 0;">No comments yet. Be the first!</p>
+      {% endfor %}
+
+      <!-- Add Comment form -->
+      <form method="post" action="{% url 'add_comment' post.id %}" class="comment-form">
+        {% csrf_token %}
+        {{ comment_form.content }}
+        <button type="submit" class="btn btn-primary btn-sm">Send</button>
+      </form>
+    </div>
+
+  </div>
+  {% endfor %}
+
+{% else %}
+<div class="empty">
+  <div class="empty-icon">📭</div>
+  <p style="font-weight:600; margin-bottom:8px;">Your feed is empty</p>
+  <p class="text-muted">Follow people on the <a href="{% url 'explore' %}" style="color:var(--accent); text-decoration:none;">Explore</a> page to see their posts here.</p>
+</div>
+{% endif %}
+
+{% endblock %}
